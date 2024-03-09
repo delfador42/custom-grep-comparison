@@ -1,0 +1,185 @@
+Benchmark custom 'grep' programs written in different languages against each other and against GNU grep, ag (The Silver Searcher),and rg (ripgrep). Time it takes to find all occurrences of 'Aragorn' in 'Lord of the Rings Trilogy.txt'
+
+
+grep (BSD grep, GNU compatible) 2.6.0-FreeBSD
+ag version 2.2.0
+ripgrep 13.0.0
+
+
+My System Specs
+Model Name: MacBook Pro
+      Model Identifier: MacBookPro15,2
+      Processor Name: Quad-Core Intel Core i7
+      Processor Speed: 2.8 GHz
+      Number of Processors: 1
+      Total Number of Cores: 4
+      L2 Cache (per Core): 256 KB
+      L3 Cache: 8 MB
+      Hyper-Threading Technology: Enabled
+      Memory: 16 GB
+
+
+:: 100 runs cold cache
+hyperfine --runs 100 --prepare 'sudo purge' \
+'/usr/bin/grep "Aragorn" Lord\ of\ the\ Rings\ Trilogy.txt' \
+'/usr/local/bin/ag "Aragorn" Lord\ of\ the\ Rings\ Trilogy.txt' \
+'/usr/local/bin/rg "Aragorn" Lord\ of\ the\ Rings\ Trilogy.txt' \
+
+
+:: 100 runs warm cache of 100 rounds
+hyperfine --runs 100 --warmup 100 \
+'/usr/bin/grep "Aragorn" Lord\ of\ the\ Rings\ Trilogy.txt' \
+'/usr/local/bin/ag "Aragorn" Lord\ of\ the\ Rings\ Trilogy.txt' \
+'/usr/local/bin/rg "Aragorn" Lord\ of\ the\ Rings\ Trilogy.txt' \
+
+
+
+
+Baseline with 100 runs and cold cache
+===============================================================================
+Immortal| custom_grep |hyperfine --runs 100 --prepare 'sudo purge' \
+'/usr/bin/grep "Aragorn" Lord\ of\ the\ Rings\ Trilogy.txt' \
+'/usr/local/bin/ag "Aragorn" Lord\ of\ the\ Rings\ Trilogy.txt' \
+'/usr/local/bin/rg "Aragorn" Lord\ of\ the\ Rings\ Trilogy.txt' \
+
+Benchmark 1: /usr/bin/grep "Aragorn" Lord\ of\ the\ Rings\ Trilogy.txt
+  Time (mean ± σ):     189.4 ms ± 112.7 ms    [User: 19.0 ms, System: 81.3 ms]
+  Range (min … max):    38.2 ms … 916.6 ms    100 runs
+
+  Warning: Statistical outliers were detected. Consider re-running this benchmark on a quiet system without any interferences from other programs. It might help to use the '--warmup' or '--prepare' options.
+
+Benchmark 2: /usr/local/bin/ag "Aragorn" Lord\ of\ the\ Rings\ Trilogy.txt
+  Time (mean ± σ):     262.1 ms ±  64.6 ms    [User: 29.2 ms, System: 99.9 ms]
+  Range (min … max):   149.0 ms … 527.6 ms    100 runs
+
+Benchmark 3: /usr/local/bin/rg "Aragorn" Lord\ of\ the\ Rings\ Trilogy.txt
+  Time (mean ± σ):     207.8 ms ±  63.0 ms    [User: 5.2 ms, System: 82.3 ms]
+  Range (min … max):   104.6 ms … 570.2 ms    100 runs
+
+  Warning: Statistical outliers were detected. Consider re-running this benchmark on a quiet system without any interferences from other programs. It might help to use the '--warmup' or '--prepare' options.
+
+Summary
+  /usr/bin/grep "Aragorn" Lord\ of\ the\ Rings\ Trilogy.txt ran
+    1.10 ± 0.73 times faster than /usr/local/bin/rg "Aragorn" Lord\ of\ the\ Rings\ Trilogy.txt
+    1.38 ± 0.89 times faster than /usr/local/bin/ag "Aragorn" Lord\ of\ the\ Rings\ Trilogy.txt
+===============================================================================
+
+
+
+
+
+Baseline with 100 runs and a warmup of 100 runs
+===============================================================================
+Immortal| custom_grep |hyperfine --runs 100 --warmup 100 \
+'/usr/bin/grep "Aragorn" Lord\ of\ the\ Rings\ Trilogy.txt' \
+'/usr/local/bin/ag "Aragorn" Lord\ of\ the\ Rings\ Trilogy.txt' \
+'/usr/local/bin/rg "Aragorn" Lord\ of\ the\ Rings\ Trilogy.txt' \
+
+Benchmark 1: /usr/bin/grep "Aragorn" Lord\ of\ the\ Rings\ Trilogy.txt
+  Time (mean ± σ):      16.4 ms ±   0.8 ms    [User: 13.9 ms, System: 1.8 ms]
+  Range (min … max):    14.8 ms …  19.8 ms    100 runs
+
+Benchmark 2: /usr/local/bin/ag "Aragorn" Lord\ of\ the\ Rings\ Trilogy.txt
+  Time (mean ± σ):      32.4 ms ±   1.8 ms    [User: 23.7 ms, System: 6.7 ms]
+  Range (min … max):    29.8 ms …  38.5 ms    100 runs
+
+Benchmark 3: /usr/local/bin/rg "Aragorn" Lord\ of\ the\ Rings\ Trilogy.txt
+  Time (mean ± σ):       6.9 ms ±   0.5 ms    [User: 3.7 ms, System: 2.2 ms]
+  Range (min … max):     6.2 ms …   8.8 ms    100 runs
+
+Summary
+  /usr/local/bin/rg "Aragorn" Lord\ of\ the\ Rings\ Trilogy.txt ran
+    2.39 ± 0.20 times faster than /usr/bin/grep "Aragorn" Lord\ of\ the\ Rings\ Trilogy.txt
+    4.71 ± 0.41 times faster than /usr/local/bin/ag "Aragorn" Lord\ of\ the\ Rings\ Trilogy.txt
+Immortal| custom_grep |
+===============================================================================
+
+
+
+So far it seems that with a cold cache 'grep' wins and with a warm cache 'rg'
+wins. This could be due 'grep' being optimized for direct disk access and
+'ripgrep' is optimized for in-memory data processing.
+
+
+
+
+
+
+hyperfine --runs 100 --prepare 'sudo purge' \
+'/usr/bin/grep "Aragorn" Lord\ of\ the\ Rings\ Trilogy.txt' \
+'/usr/local/bin/ag "Aragorn" Lord\ of\ the\ Rings\ Trilogy.txt' \
+'/usr/local/bin/rg "Aragorn" Lord\ of\ the\ Rings\ Trilogy.txt' \
+'python3 ./py_grep.py "Aragorn" Lord\ of\ the\ Rings\ Trilogy.txt' \
+
+With python grep and cold cache
+===============================================================================
+Immortal| custom_grep |hyperfine --runs 100 --prepare 'sudo purge' \                                                             130 ↵
+'/usr/bin/grep "Aragorn" Lord\ of\ the\ Rings\ Trilogy.txt' \
+'/usr/local/bin/ag "Aragorn" Lord\ of\ the\ Rings\ Trilogy.txt' \
+'/usr/local/bin/rg "Aragorn" Lord\ of\ the\ Rings\ Trilogy.txt' \
+'python3 ./py_grep.py "Aragorn" Lord\ of\ the\ Rings\ Trilogy.txt' \
+
+Benchmark 1: /usr/bin/grep "Aragorn" Lord\ of\ the\ Rings\ Trilogy.txt
+  Time (mean ± σ):     151.6 ms ±  62.3 ms    [User: 16.9 ms, System: 76.1 ms]
+  Range (min … max):    63.5 ms … 469.0 ms    100 runs
+
+  Warning: Statistical outliers were detected. Consider re-running this benchmark on a quiet system without any interferences from other programs. It might help to use the '--warmup' or '--prepare' options.
+
+Benchmark 2: /usr/local/bin/ag "Aragorn" Lord\ of\ the\ Rings\ Trilogy.txt
+  Time (mean ± σ):     228.5 ms ±  36.9 ms    [User: 27.0 ms, System: 94.5 ms]
+  Range (min … max):   134.5 ms … 361.5 ms    100 runs
+
+Benchmark 3: /usr/local/bin/rg "Aragorn" Lord\ of\ the\ Rings\ Trilogy.txt
+  Time (mean ± σ):     198.3 ms ±  32.0 ms    [User: 5.1 ms, System: 86.3 ms]
+  Range (min … max):   140.7 ms … 370.0 ms    100 runs
+
+Benchmark 4: python3 ./py_grep.py "Aragorn" Lord\ of\ the\ Rings\ Trilogy.txt
+  Time (mean ± σ):     388.7 ms ±  52.1 ms    [User: 40.1 ms, System: 165.7 ms]
+  Range (min … max):   243.6 ms … 534.0 ms    100 runs
+
+Summary
+  /usr/bin/grep "Aragorn" Lord\ of\ the\ Rings\ Trilogy.txt ran
+    1.31 ± 0.58 times faster than /usr/local/bin/rg "Aragorn" Lord\ of\ the\ Rings\ Trilogy.txt
+    1.51 ± 0.67 times faster than /usr/local/bin/ag "Aragorn" Lord\ of\ the\ Rings\ Trilogy.txt
+    2.56 ± 1.11 times faster than python3 ./py_grep.py "Aragorn" Lord\ of\ the\ Rings\ Trilogy.txt
+Immortal| custom_grep |
+===============================================================================
+
+
+
+
+hyperfine --runs 100 --warmup 100 \
+'/usr/bin/grep "Aragorn" Lord\ of\ the\ Rings\ Trilogy.txt' \
+'/usr/local/bin/ag "Aragorn" Lord\ of\ the\ Rings\ Trilogy.txt' \
+'/usr/local/bin/rg "Aragorn" Lord\ of\ the\ Rings\ Trilogy.txt' \
+'python3 ./py_grep.py "Aragorn" Lord\ of\ the\ Rings\ Trilogy.txt' \
+===============================================================================
+Immortal| custom_grep |hyperfine --runs 100 --warmup 100 \
+'/usr/bin/grep "Aragorn" Lord\ of\ the\ Rings\ Trilogy.txt' \
+'/usr/local/bin/ag "Aragorn" Lord\ of\ the\ Rings\ Trilogy.txt' \
+'/usr/local/bin/rg "Aragorn" Lord\ of\ the\ Rings\ Trilogy.txt' \
+'python3 ./py_grep.py "Aragorn" Lord\ of\ the\ Rings\ Trilogy.txt' \
+
+Benchmark 1: /usr/bin/grep "Aragorn" Lord\ of\ the\ Rings\ Trilogy.txt
+  Time (mean ± σ):      16.4 ms ±   1.0 ms    [User: 13.9 ms, System: 1.7 ms]
+  Range (min … max):    14.8 ms …  22.1 ms    100 runs
+
+Benchmark 2: /usr/local/bin/ag "Aragorn" Lord\ of\ the\ Rings\ Trilogy.txt
+  Time (mean ± σ):      31.2 ms ±   1.0 ms    [User: 23.0 ms, System: 6.2 ms]
+  Range (min … max):    29.2 ms …  35.4 ms    100 runs
+
+Benchmark 3: /usr/local/bin/rg "Aragorn" Lord\ of\ the\ Rings\ Trilogy.txt
+  Time (mean ± σ):       6.4 ms ±   0.3 ms    [User: 3.5 ms, System: 2.0 ms]
+  Range (min … max):     5.9 ms …   7.4 ms    100 runs
+
+Benchmark 4: python3 ./py_grep.py "Aragorn" Lord\ of\ the\ Rings\ Trilogy.txt
+  Time (mean ± σ):      47.0 ms ±   1.2 ms    [User: 33.7 ms, System: 10.3 ms]
+  Range (min … max):    45.0 ms …  54.8 ms    100 runs
+
+Summary
+  /usr/local/bin/rg "Aragorn" Lord\ of\ the\ Rings\ Trilogy.txt ran
+    2.54 ± 0.20 times faster than /usr/bin/grep "Aragorn" Lord\ of\ the\ Rings\ Trilogy.txt
+    4.86 ± 0.29 times faster than /usr/local/bin/ag "Aragorn" Lord\ of\ the\ Rings\ Trilogy.txt
+    7.31 ± 0.42 times faster than python3 ./py_grep.py "Aragorn" Lord\ of\ the\ Rings\ Trilogy.txt
+Immortal| custom_grep |
+===============================================================================
