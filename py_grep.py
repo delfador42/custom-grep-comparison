@@ -2,7 +2,7 @@ import re
 import sys
 
 def grep(pattern, file):
-    with open(file, 'r', encoding='ISO-8859-1', errors='ignore') as f:
+    with open(file, 'r') as f:
         for line in f:
             if re.search(pattern, line):
                 print(line, end='')
